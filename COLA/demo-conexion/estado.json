@@ -12,7 +12,7 @@
   "audio_sugerido": "(demo — sin audio)",
   "aprobado": false,
   "descartado": false,
-  "revision_enviada": false,
+  "revision_enviada": true,
   "recordatorio_enviado": false,
   "publicado": {},
   "intentos": 0
