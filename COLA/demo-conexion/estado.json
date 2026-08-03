@@ -1,6 +1,6 @@
 {
-  "titulo": "DEMO — Montacarguista vs operador de CLAM",
-  "programado": "2026-08-05T07:00:00-05:00",
+  "titulo": "PRUEBA DEL SISTEMA — toca Aprobar",
+  "programado": "2026-08-04T08:00:00-05:00",
   "formato": "imagen",
   "redes": [
     "instagram"
@@ -12,7 +12,7 @@
   "audio_sugerido": "(demo — sin audio)",
   "aprobado": false,
   "descartado": false,
-  "revision_enviada": true,
+  "revision_enviada": false,
   "recordatorio_enviado": false,
   "publicado": {},
   "intentos": 0
