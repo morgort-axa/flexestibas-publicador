@@ -14,22 +14,21 @@ Tú produces el reel  →  encolar.py  →  git push
 
 ---
 
-## Por qué la publicación no es 100% automática
+## Por qué SÍ es automática (y qué lo hizo posible)
 
-**La Graph API de Meta no puede adjuntar audio de la biblioteca de Instagram.**
-Un reel publicado por API sale con el audio embebido en el archivo, y nada más.
-Los audios en tendencia solo se agregan desde la app, a mano.
+La Graph API de Meta **no puede adjuntar audio de la biblioteca de Instagram**.
+Mientras el plan fue usar audio en tendencia, publicar por API era imposible.
 
-Además, las cuentas Business tienen la biblioteca de música restringida por
-licencias. Usar música comercial sin licencia desde una cuenta de empresa es
-lo que dispara strikes de copyright.
+Al pasar a **música licenciada de marca**, el audio va embebido en el archivo
+de video — y eso la API lo publica sin problema. Además elimina el riesgo de
+strike de copyright, que en una cuenta Business limita la cuenta entera.
 
-Por eso el modo por defecto es **manual**: el sistema automatiza producción,
-calendario, caption, aprobación y recordatorio — el 95% del trabajo. Publicar
-te toma 40 segundos y conservas el audio en tendencia.
+De paso resuelve algo de marca: 2-3 tracks fijos que rotan hacen que el
+contenido se reconozca antes de ver el logo. El audio en tendencia es de
+creador de contenido, no de empresa de logística.
 
-Si algún día el audio deja de importar, `MODO_PUBLICACION=auto` publica solo.
-Es cambiar una variable.
+**Modo actual:** `auto`. El sistema publica solo tras tu aprobación.
+`MODO_PUBLICACION=manual` vuelve al aviso por Telegram si alguna vez hace falta.
 
 ---
 
