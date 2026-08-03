@@ -9,6 +9,9 @@ on:
     - cron: "*/5 11-20 * * 1-5"
     # Una vuelta nocturna para pedir aprobaciones del dia siguiente.
     - cron: "0 1 * * *"
+  repository_dispatch:
+    # Lo dispara el Worker de Cloudflare cuando tocas un boton en Telegram.
+    types: [decision-telegram]
   workflow_dispatch:
     inputs:
       modo:
@@ -47,7 +50,13 @@ jobs:
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           REPO_PUBLICO_BASE: ${{ vars.REPO_PUBLICO_BASE }}
           MODO_PUBLICACION: ${{ inputs.modo || vars.MODO_PUBLICACION || 'manual' }}
-        run: python sistema/ciclo.py
+          WEBHOOK_ACTIVO: ${{ vars.WEBHOOK_ACTIVO }}
+        run: |
+          if [ -n "${{ github.event.client_payload.accion }}" ]; then
+            python sistema/ciclo.py               --accion "${{ github.event.client_payload.accion }}"               --pieza  "${{ github.event.client_payload.pieza }}"
+          else
+            python sistema/ciclo.py
+          fi
 
       - name: Guardar el estado de la cola
         run: |

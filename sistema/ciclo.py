@@ -16,6 +16,7 @@ MODO_PUBLICACION:
   auto    -> publica solo por la Graph API. Sin audio de biblioteca.
 """
 
+import argparse
 import os
 import sys
 from pathlib import Path
@@ -121,6 +122,60 @@ def procesar_respuestas(bot):
 
     guardar_offset(ultimo)
     return procesadas
+
+
+def aplicar_decision(bot, accion, nombre):
+    """
+    Aplica una decision que llego por webhook (el Worker ya te contesto).
+
+    El Worker responde el boton al instante y dispara esto para que la
+    decision quede guardada en git. Aqui NO se contesta el callback: eso
+    ya ocurrio hace segundos.
+    """
+    pieza = cola.buscar(nombre)
+    if pieza is None:
+        print(f"  '{nombre}' no esta en la cola")
+        return 0
+
+    if accion == "ok":
+        fallos = pieza.problemas_de_calidad()
+        if fallos:
+            pieza.set(revision_enviada=False)
+            bot.mensaje(
+                f"⚠️ <b>No pude aprobar {pieza.titulo}</b>\n\n"
+                + "\n".join(f"• {f}" for f in fallos)
+                + "\n\nCorrige y vuelvo a preguntarte."
+            )
+            cola.registrar("aprobacion_rechazada", pieza=nombre, fallos=fallos)
+            print(f"  {nombre}: rechazada por calidad -> {fallos}")
+            return 1
+        pieza.set(aprobado=True, descartado=False)
+        cuando = pieza.programado.strftime("%A %d/%m a las %H:%M")
+        bot.mensaje(f"✅ <b>{pieza.titulo}</b>\nQueda lista para el {cuando}.")
+        cola.registrar("aprobada", pieza=nombre)
+        print(f"  {nombre}: APROBADA")
+
+    elif accion == "no":
+        pieza.set(descartado=True, aprobado=False)
+        bot.mensaje(f"❌ <b>{pieza.titulo}</b>\nDescartada.")
+        cola.registrar("descartada", pieza=nombre)
+        print(f"  {nombre}: descartada")
+
+    elif accion == "mv":
+        programado = pieza.programado
+        if programado:
+            nueva = programado + cola.timedelta(days=7)
+            pieza.set(programado=nueva.isoformat(),
+                      revision_enviada=False, recordatorio_enviado=False)
+            bot.mensaje(
+                f"⏸ <b>{pieza.titulo}</b>\nPasa al {nueva.strftime('%A %d/%m %H:%M')}."
+            )
+            cola.registrar("pospuesta", pieza=nombre, nueva=nueva.isoformat())
+            print(f"  {nombre}: pospuesta a {nueva.date()}")
+    else:
+        print(f"  accion desconocida: {accion}")
+        return 0
+    return 1
 
 
 # --------------------------------------------------------- 2. pedir aprobacion
@@ -233,6 +288,11 @@ def atender_publicaciones(bot, modo):
 
 
 def main():
+    ap = argparse.ArgumentParser(description="Ciclo de contenido FLEXESTIBAS")
+    ap.add_argument("--accion", help="Decision que llego por webhook: ok | no | mv")
+    ap.add_argument("--pieza", help="Nombre de la pieza a la que aplica")
+    args = ap.parse_args()
+
     modo = os.environ.get("MODO_PUBLICACION", "manual").lower()
     if modo not in ("manual", "auto"):
         print(f"MODO_PUBLICACION invalido: {modo}")
@@ -249,8 +309,18 @@ def main():
 
     print(f"Ciclo — {cola.ahora().strftime('%Y-%m-%d %H:%M')} Ecuador · modo {modo}")
 
-    respuestas = procesar_respuestas(bot)
-    print(f"  {respuestas} respuesta(s) tuya(s) procesada(s)")
+    # Llegada por webhook: aplicar la decision y salir. No se toca el resto
+    # para que el guardado sea lo mas rapido posible.
+    if args.accion and args.pieza:
+        print(f"  webhook: {args.accion} -> {args.pieza}")
+        aplicar_decision(bot, args.accion, args.pieza)
+        return 0
+
+    # Con el webhook activo, getUpdates queda vacio (Telegram no permite
+    # las dos vias a la vez). Se conserva como respaldo si el webhook cae.
+    if not os.environ.get("WEBHOOK_ACTIVO"):
+        respuestas = procesar_respuestas(bot)
+        print(f"  {respuestas} respuesta(s) tuya(s) procesada(s)")
 
     enviadas = pedir_aprobaciones(bot)
     print(f"  {enviadas} pieza(s) enviada(s) a revision")
