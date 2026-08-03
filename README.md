@@ -49,7 +49,7 @@ igual y captions. **El token nunca entra al repo, va en Secrets.**
 ```
 cd PUBLICADOR
 git init && git add . && git commit -m "publicador"
-git remote add origin https://github.com/TU_USUARIO/flexestibas-publicador.git
+git remote add origin https://github.com/morgort-axa/flexestibas-publicador.git
 git push -u origin main
 ```
 
@@ -70,7 +70,7 @@ git push -u origin main
 
 | Nombre | Valor |
 |---|---|
-| `REPO_PUBLICO_BASE` | `https://raw.githubusercontent.com/TU_USUARIO/flexestibas-publicador/main` |
+| `REPO_PUBLICO_BASE` | `https://raw.githubusercontent.com/morgort-axa/flexestibas-publicador/main` |
 | `MODO_PUBLICACION` | `manual` |
 
 En modo manual solo hacen falta los dos primeros secrets.
