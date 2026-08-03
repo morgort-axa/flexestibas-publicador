@@ -1,0 +1,63 @@
+name: Ciclo de contenido FLEXESTIBAS
+
+on:
+  schedule:
+    # Cada 15 min entre 11:00 y 19:00 UTC = 06:00 a 14:00 en Ecuador.
+    # Cubre las tres ventanas de publicacion (mar 07:00, mie 12:30, jue 07:00)
+    # con margen de sobra. Fuera de esa franja no hay nada que atender.
+    - cron: "*/15 11-19 * * 1-5"
+    # Una vuelta nocturna para pedir aprobaciones del dia siguiente.
+    - cron: "0 1 * * *"
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: "Modo de publicacion"
+        required: false
+        default: "manual"
+        type: choice
+        options: [manual, auto]
+
+concurrency:
+  # Dos ciclos a la vez publicarian dos veces. Nunca.
+  group: ciclo-flexestibas
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  ciclo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install requests
+
+      - name: Correr ciclo
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          REPO_PUBLICO_BASE: ${{ vars.REPO_PUBLICO_BASE }}
+          MODO_PUBLICACION: ${{ inputs.modo || vars.MODO_PUBLICACION || 'manual' }}
+        run: python sistema/ciclo.py
+
+      - name: Guardar el estado de la cola
+        run: |
+          git config user.name  "bot-flexestibas"
+          git config user.email "bot@flexestibas.local"
+          git add COLA LOG
+          if git diff --staged --quiet; then
+            echo "Sin cambios de estado."
+          else
+            git commit -m "estado: ciclo $(date -u +'%Y-%m-%d %H:%M UTC')"
+            # Otro ciclo pudo haber commiteado mientras corriamos.
+            git pull --rebase --autostash origin ${{ github.ref_name }}
+            git push
+          fi
