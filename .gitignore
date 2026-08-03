@@ -1,0 +1,11 @@
+# Nada de credenciales en el repo. Van en GitHub Secrets.
+.env
+.env.*
+*.token
+credenciales*
+
+__pycache__/
+*.pyc
+
+.DS_Store
+Thumbs.db

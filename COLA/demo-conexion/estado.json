@@ -1,0 +1,19 @@
+{
+  "titulo": "DEMO — Montacarguista vs operador de CLAM",
+  "programado": "2026-08-05T07:00:00-05:00",
+  "formato": "imagen",
+  "redes": [
+    "instagram"
+  ],
+  "media": [
+    "media/final.png"
+  ],
+  "caption_file": "caption.txt",
+  "audio_sugerido": "(demo — sin audio)",
+  "aprobado": false,
+  "descartado": false,
+  "revision_enviada": true,
+  "recordatorio_enviado": false,
+  "publicado": {},
+  "intentos": 0
+}
