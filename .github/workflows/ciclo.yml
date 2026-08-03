@@ -51,9 +51,21 @@ jobs:
           REPO_PUBLICO_BASE: ${{ vars.REPO_PUBLICO_BASE }}
           MODO_PUBLICACION: ${{ inputs.modo || vars.MODO_PUBLICACION || 'manual' }}
           WEBHOOK_ACTIVO: ${{ vars.WEBHOOK_ACTIVO }}
+          # El payload llega de internet: entra como variable, NUNCA
+          # interpolado en el shell, y se valida antes de usarse.
+          ACCION: ${{ github.event.client_payload.accion }}
+          PIEZA: ${{ github.event.client_payload.pieza }}
         run: |
-          if [ -n "${{ github.event.client_payload.accion }}" ]; then
-            python sistema/ciclo.py               --accion "${{ github.event.client_payload.accion }}"               --pieza  "${{ github.event.client_payload.pieza }}"
+          set -euo pipefail
+          if [ -n "${ACCION:-}" ]; then
+            case "$ACCION" in
+              ok|no|mv) ;;
+              *) echo "accion no permitida"; exit 1 ;;
+            esac
+            case "$PIEZA" in
+              "" |*[!A-Za-z0-9._-]*) echo "nombre de pieza no permitido"; exit 1 ;;
+            esac
+            python sistema/ciclo.py --accion "$ACCION" --pieza "$PIEZA"
           else
             python sistema/ciclo.py
           fi

@@ -60,7 +60,11 @@ export default {
       })
     );
 
-    if (!accion || !pieza) {
+    // Solo estas tres acciones y nombres de pieza sin caracteres raros.
+    // GitHub vuelve a validarlo del otro lado: si algo se cuela aqui,
+    // alla se rechaza igual.
+    const ACCIONES = ["ok", "no", "mv"];
+    if (!ACCIONES.includes(accion) || !/^[A-Za-z0-9._-]+$/.test(pieza)) {
       return new Response("ok", { status: 200 });
     }
 
