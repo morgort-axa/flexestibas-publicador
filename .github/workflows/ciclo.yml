@@ -2,10 +2,11 @@ name: Ciclo de contenido FLEXESTIBAS
 
 on:
   schedule:
-    # Cada 15 min entre 11:00 y 19:00 UTC = 06:00 a 14:00 en Ecuador.
-    # Cubre las tres ventanas de publicacion (mar 07:00, mie 12:30, jue 07:00)
+    # Cada 5 min entre 11:00 y 20:00 UTC = 06:00 a 15:00 en Ecuador.
+    # 5 min es el minimo util de GitHub Actions; por debajo ignora el cron.
+    # Cubre las tres ventanas de publicacion (lun 07:30, mar 08:00, vie 12:30)
     # con margen de sobra. Fuera de esa franja no hay nada que atender.
-    - cron: "*/15 11-19 * * 1-5"
+    - cron: "*/5 11-20 * * 1-5"
     # Una vuelta nocturna para pedir aprobaciones del dia siguiente.
     - cron: "0 1 * * *"
   workflow_dispatch:
