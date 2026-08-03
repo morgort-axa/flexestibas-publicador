@@ -10,7 +10,7 @@
   ],
   "caption_file": "caption.txt",
   "audio_sugerido": "(demo — sin audio)",
-  "aprobado": false,
+  "aprobado": true,
   "descartado": false,
   "revision_enviada": true,
   "recordatorio_enviado": false,
